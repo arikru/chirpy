@@ -16,10 +16,21 @@ func (cfg *apiConfig) middleWareMetricsInc(next http.Handler) http.Handler {
 	})
 }
 
+const adminPage = `
+	<html>
+
+	<body>
+	<h1>Welcome, Chirpy Admin</h1>
+	<p>Chirpy has been visited %d times!</p>
+	</body>
+
+	</html>
+	`
+
 func (cfg *apiConfig) handlerHits(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
-	w.Write([]byte(fmt.Sprintf("Hits: %d", cfg.fileServerHits)))
+	w.Write([]byte(fmt.Sprintf(adminPage, cfg.fileServerHits)))
 }
 
 func (cfg *apiConfig) handlerReset(w http.ResponseWriter, r *http.Request) {

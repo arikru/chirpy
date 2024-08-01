@@ -10,17 +10,17 @@ func main() {
 	const filePath = "."
 	const port = "8080"
 
-	mux := http.NewServeMux()
-	mux.Handle("/app/", http.StripPrefix("/app", http.FileServer(http.Dir(filePath))))
-	mux.Handle("/app/assets/logo.png", http.FileServer(http.Dir(filePath+"/assets/logo.png")))
-
-	healthzHandler := func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Header().Add("Content-Type", "text/plain; charset=utf-8")
-		w.Write([]byte(http.StatusText(http.StatusOK)))
+	apiCfg := apiConfig{
+		fileServerHits: 0,
 	}
 
-	mux.HandleFunc("/healthz", healthzHandler)
+	mux := http.NewServeMux()
+	mux.Handle("/app/*", http.StripPrefix("/app", apiCfg.middleWareMetricsInc(http.FileServer(http.Dir(filePath)))))
+	// mux.Handle("/app/assets/logo.png", http.FileServer(http.Dir(filePath+"/assets/logo.png")))
+	mux.HandleFunc("GET /healthz", handlerReadiness)
+	mux.HandleFunc("GET /metrics", apiCfg.handlerHits)
+	mux.HandleFunc("/reset", apiCfg.handlerReset)
+
 	server := &http.Server{
 		Addr:    ":" + port,
 		Handler: mux,
@@ -28,4 +28,5 @@ func main() {
 
 	fmt.Printf("Serving files  on http://localhost:%v/app", port)
 	log.Fatal(server.ListenAndServe())
+
 }

@@ -15,17 +15,17 @@ func main() {
 	mux.Handle("/app/assets/logo.png", http.FileServer(http.Dir(filePath+"/assets/logo.png")))
 
 	healthzHandler := func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 		w.Header().Add("Content-Type", "text/plain; charset=utf-8")
-		w.Write([]byte("OK"))
+		w.Write([]byte(http.StatusText(http.StatusOK)))
 	}
 
 	mux.HandleFunc("/healthz", healthzHandler)
-	server := http.Server{
+	server := &http.Server{
 		Addr:    ":" + port,
 		Handler: mux,
 	}
 
-	fmt.Printf("Serving files from %s on port: %v", filePath, port)
+	fmt.Printf("Serving files  on http://localhost:%v/app", port)
 	log.Fatal(server.ListenAndServe())
 }
